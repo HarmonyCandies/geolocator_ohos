@@ -65,7 +65,7 @@ class PositionOhos extends Position {
     final timestamp = positionMap['timeStamp'] != null
         ? DateTime.fromMillisecondsSinceEpoch(positionMap['timeStamp'].toInt(),
             isUtc: true)
-        : null;
+        : DateTime.now();
 
     return PositionOhos(
       latitude: asT<double>(positionMap['latitude']) ?? 0.0,
