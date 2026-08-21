@@ -20,7 +20,14 @@ export class PositionHandler {
     }
   }
 
-  static async getLastLocation(): Promise<geoLocationManager.Location> {
-    return geoLocationManager.getLastLocation();
+  // Official getLastLocation() throws BusinessError (3301100 no cache,
+  // 3301000 service unavailable, 801 unsupported). Callers must not let
+  // that escape an uncompleted MethodResult.
+  static async getLastLocation(): Promise<geoLocationManager.Location | undefined> {
+    try {
+      return geoLocationManager.getLastLocation();
+    } catch (e) {
+      return undefined;
+    }
   }
 }
