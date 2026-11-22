@@ -93,11 +93,14 @@ class LocationImplements extends GeolocatorPlatform {
     LocationSettings? locationSettings,
     String? requestId,
   }) async {
-    assert(
-      locationSettings == null ||
-          locationSettings is CurrentLocationSettingsOhos,
-      'locationSettings should be CurrentLocationSettingsOhos',
-    );
+    final settings = locationSettings ?? const LocationSettings();
+    final request = settings is CurrentLocationSettingsOhos
+        ? settings
+        : CurrentLocationSettingsOhos(
+            priority: _priorityFor(settings.accuracy),
+            timeoutMs:
+                settings.timeLimit?.inMilliseconds.clamp(1000, 0x7fffffff),
+          );
 
     try {
       final Duration? timeLimit = locationSettings?.timeLimit;
@@ -105,7 +108,7 @@ class LocationImplements extends GeolocatorPlatform {
       Future<dynamic> positionFuture =
           GeolocatorOhos._methodChannel.invokeMethod(
         'getCurrentPosition',
-        locationSettings?.toString(),
+        request.toString(),
       );
 
       if (timeLimit != null) {
@@ -158,13 +161,16 @@ class LocationImplements extends GeolocatorPlatform {
       return _positionStream!;
     }
 
-    assert(
-      locationSettings == null || locationSettings is LocationSettingsOhos,
-      'locationSettings should be a LocationSettingsOhos',
-    );
+    final settings = locationSettings ?? const LocationSettings();
+    final request = settings is LocationSettingsOhos
+        ? settings
+        : LocationSettingsOhos(
+            priority: _priorityFor(settings.accuracy),
+            distanceInterval: settings.distanceFilter,
+          );
 
     var originalStream = _eventChannel.receiveBroadcastStream(
-      locationSettings?.toString(),
+      request.toString(),
     );
 
     var positionStream = _wrapStream(originalStream);
@@ -203,6 +209,20 @@ class LocationImplements extends GeolocatorPlatform {
       subscription.cancel();
       _positionStream = null;
     });
+  }
+
+  LocationRequestPriority _priorityFor(LocationAccuracy accuracy) {
+    return switch (accuracy) {
+      LocationAccuracy.lowest ||
+      LocationAccuracy.low ||
+      LocationAccuracy.reduced =>
+        LocationRequestPriority.lowPower,
+      LocationAccuracy.medium => LocationRequestPriority.firstFix,
+      LocationAccuracy.high ||
+      LocationAccuracy.best ||
+      LocationAccuracy.bestForNavigation =>
+        LocationRequestPriority.accuracy,
+    };
   }
 
   @override

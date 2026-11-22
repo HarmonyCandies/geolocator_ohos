@@ -11,13 +11,13 @@ topics:
   - openharmony
 
 environment:
-  sdk: '>=2.19.6 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
   flutter: ">=3.7.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  geolocator_platform_interface: ^4.1.0
+  geolocator_platform_interface: ^4.2.0
 
 dev_dependencies:
   flutter_test:

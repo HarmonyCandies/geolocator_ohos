@@ -86,7 +86,7 @@ class PositionOhos extends Position {
     return {
       'longitude': longitude,
       'latitude': latitude,
-      'timestamp': timestamp?.millisecondsSinceEpoch,
+      'timestamp': timestamp.millisecondsSinceEpoch,
       'accuracy': accuracy,
       'altitude': altitude,
       'speed': speed,
